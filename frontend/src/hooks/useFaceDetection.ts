@@ -30,43 +30,51 @@ export function useFaceDetection(
 
     let cancelled = false;
     let timeoutId = 0;
-    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 320 });
+    const options = new faceapi.TinyFaceDetectorOptions({
+      inputSize: 416,
+      scoreThreshold: 0.35,
+    });
 
     const tick = async () => {
-      const video = videoRef.current;
-      if (video && video.readyState >= 2) {
-        const detections = await faceapi
-          .detectAllFaces(video, options)
-          .withFaceLandmarks(true);
+      try {
+        const video = videoRef.current;
+        if (video && video.readyState >= 2) {
+          const detections = await faceapi
+            .detectAllFaces(video, options)
+            .withFaceLandmarks(true);
 
-        const detected: TrackedFace[] = detections.map((d) => {
-          const box = d.detection.box;
-          const points = d.landmarks.positions;
-          // Landmarks 17-26 trace the eyebrows; their average sits just
-          // below the forehead, which is the point we want to label.
-          const browPoints = points.slice(17, 27);
-          const browX =
-            browPoints.reduce((sum, p) => sum + p.x, 0) / browPoints.length;
-          const browY =
-            browPoints.reduce((sum, p) => sum + p.y, 0) / browPoints.length;
-          const foreheadY = browY - box.height * 0.25;
+          const detected: TrackedFace[] = detections.map((d) => {
+            const box = d.detection.box;
+            const points = d.landmarks.positions;
+            // Landmarks 17-26 trace the eyebrows; their average sits just
+            // below the forehead, which is the point we want to label.
+            const browPoints = points.slice(17, 27);
+            const browX =
+              browPoints.reduce((sum, p) => sum + p.x, 0) / browPoints.length;
+            const browY =
+              browPoints.reduce((sum, p) => sum + p.y, 0) / browPoints.length;
+            const foreheadY = browY - box.height * 0.25;
 
-          return {
-            id: -1,
-            x: box.x,
-            y: box.y,
-            width: box.width,
-            height: box.height,
-            foreheadX: browX,
-            foreheadY,
-          };
-        });
+            return {
+              id: -1,
+              x: box.x,
+              y: box.y,
+              width: box.width,
+              height: box.height,
+              foreheadX: browX,
+              foreheadY,
+            };
+          });
 
-        const matched = matchFaces(detected, previous.current, nextId);
-        previous.current = matched;
-        if (!cancelled) setFaces(matched);
+          const matched = matchFaces(detected, previous.current, nextId);
+          previous.current = matched;
+          if (!cancelled) setFaces(matched);
+        }
+      } catch {
+        // Keep polling if a camera frame is unavailable while the stream starts.
+      } finally {
+        if (!cancelled) timeoutId = window.setTimeout(tick, DETECT_INTERVAL_MS);
       }
-      if (!cancelled) timeoutId = window.setTimeout(tick, DETECT_INTERVAL_MS);
     };
 
     timeoutId = window.setTimeout(tick, 0);

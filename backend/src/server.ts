@@ -35,7 +35,6 @@ const getTeamsHandler = async (req: Request, res: Response) => {
   }
 
   try {
-    // console.log("here")
     const url = `${FOOTBALL_DATA_API_BASE_URL}/competitions/CL/teams?season=${season}`;
 
     const response = await fetch(url, {
@@ -55,7 +54,6 @@ const getTeamsHandler = async (req: Request, res: Response) => {
     }
 
     const data: any = JSON.parse(rawText)
-    console.log(data[0])
     const teamData = Array.isArray(data)
       ? data
       : data && typeof data === "object" && "teams" in data
