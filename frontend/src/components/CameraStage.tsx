@@ -128,8 +128,8 @@ export function CameraStage({ teams, mode, fixedCount }: Props) {
                 href={team.crestUrl}
                 x={face.foreheadX - 28}
                 y={face.foreheadY - 56}
-                width="100"
-                height="100"
+                width="200"
+                height="200"
                 className="camera-stage__crest"
                 preserveAspectRatio="xMidYMid meet"
                 transform={`translate(${2 * face.foreheadX} 0) scale(-1 1)`}
