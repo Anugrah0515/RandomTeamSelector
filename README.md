@@ -2,6 +2,8 @@
 
 Face Off is a web app that assigns football teams to people in front of a camera. It can use a manually entered team list or load Champions League teams for a selected season, then labels detected faces with unique team assignments.
 
+[View Live Website](https://randomteamselector-frontend.onrender.com)
+
 ## Project Structure
 
 ```text
